@@ -38,6 +38,7 @@ OF SUCH DAMAGE.
 #include "gd32f30x.h"
 #include <stdio.h>
 #include "gd32f307c_eval.h"
+#include "HAL_rcc.h"
 
 #define ARRAYNUM(arr_name)     (uint32_t)(sizeof(arr_name) / sizeof(*(arr_name)))
 #define USART0_DATA_ADDRESS    ((uint32_t)&USART_DATA(USART0))
@@ -45,6 +46,7 @@ OF SUCH DAMAGE.
 __IO FlagStatus g_transfer_complete = RESET;
 uint8_t rxbuffer[10];
 uint8_t txbuffer[] = "\n\rUSART DMA receive and transmit example, please input 10 bytes:\n\r";
+uint32_t system_freq;
 
 void nvic_config(void);
 
@@ -121,6 +123,11 @@ int main(void)
     /* waiting for the transfer to complete*/
     while(RESET == g_transfer_complete){
     }
+	
+	GetSystemClock(&system_freq);
+	while(SetSystemClock(96000000));
+	GetSystemClock(&system_freq);
+	
     
     g_transfer_complete = RESET;
 
@@ -155,7 +162,7 @@ int main(void)
 //    dma_interrupt_enable(DMA0, DMA_CH3, DMA_INT_FTF);
     /* enable DMA0 channel3 */
     dma_channel_enable(DMA0, DMA_CH3);
-
+	
     while(1){
     }
 }

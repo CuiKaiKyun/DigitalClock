@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>.\GD32F30x_standard_peripheral\Include;.\CMSIS\GD\GD32F30x\Include;.\CMSIS;..\Software;.\Utilities</IncludePath>
+              <IncludePath>.\GD32F30x_standard_peripheral\Include;.\CMSIS\GD\GD32F30x\Include;.\CMSIS;..\Software;.\Utilities;.\HAL\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -628,6 +628,13 @@
         </Group>
         <Group>
           <GroupName>HAL</GroupName>
+          <Files>
+            <File>
+              <FileName>HAL_rcc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\HAL\Source\HAL_rcc.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>Utilities</GroupName>
