@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "hal_uart.h": "c",
+        "board_resource.h": "c",
+        "gd32f30x.h": "c",
+        "driver_rcc.h": "c",
+        "stdint.h": "c",
+        "istream": "c",
+        "limits": "c",
+        "memory": "c",
+        "streambuf": "c",
+        "cstddef": "c",
+        "string": "c",
+        "optional": "c",
+        "new": "c",
+        "functional": "c",
+        "type_traits": "c",
+        "driver_uart.h": "c"
+    }
+}

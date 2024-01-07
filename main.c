@@ -37,18 +37,33 @@ OF SUCH DAMAGE.
 
 #include "gd32f30x.h"
 #include <stdio.h>
+#include <string.h>
 #include "gd32f307c_eval.h"
-#include "HAL_rcc.h"
-
-#define ARRAYNUM(arr_name)     (uint32_t)(sizeof(arr_name) / sizeof(*(arr_name)))
-#define USART0_DATA_ADDRESS    ((uint32_t)&USART_DATA(USART0))
+#include "driver.h"
 
 __IO FlagStatus g_transfer_complete = RESET;
 uint8_t rxbuffer[10];
-uint8_t txbuffer[] = "\n\rUSART DMA receive and transmit example, please input 10 bytes:\n\r";
+const uint8_t txbuffer[] = "\n\rUSART DMA receive and transmit example, please input 10 bytes:\n\r";
 uint32_t system_freq;
 
+uint8_t debug_control_flag = 0;
+uint8_t debug_callback_flag = 0;
+uint8_t debug_first_flag = 0;
+uint8_t debug_control_buf[30];
+uint16_t send_time = 0;
+
 void nvic_config(void);
+
+static void updateflag(void)
+{
+	if(debug_first_flag == 0)
+		debug_first_flag = 1;
+	else
+	{
+		debug_callback_flag = 1;
+		debug_control_flag = 1;
+	}
+}
 
 /*!
     \brief      main function
@@ -58,113 +73,37 @@ void nvic_config(void);
 */
 int main(void)
 {
-    dma_parameter_struct dma_init_struct;
+    UartInitStruct uart_init;
 	
 	rcu_periph_clock_enable(RCU_GPIOB);
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ,GPIO_PIN_12);
     gpio_bit_reset(GPIOB, GPIO_PIN_12);
 	
-    /* enable DMA0 */
-    rcu_periph_clock_enable(RCU_DMA0);
-    /* initialize USART */
-    gd_eval_com_init(EVAL_COM0);
-    /*configure DMA0 interrupt*/
-    nvic_config();
-    
-    /* deinitialize DMA channel3(USART0 tx) */
-    dma_deinit(DMA0, DMA_CH3);
-    dma_struct_para_init(&dma_init_struct);
+    uart_init.baudrate = 115200;
+    uart_init.parity = ParityNone;
+    uart_init.stop_bit = StopBit_1Bit;
+    uart_init.word_length = WordLen_8Bit;
 
-    dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
-    dma_init_struct.memory_addr = (uint32_t)txbuffer;
-    dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-    dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-    dma_init_struct.number = ARRAYNUM(txbuffer);
-    dma_init_struct.periph_addr = USART0_DATA_ADDRESS;
-    dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-    dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-    dma_init_struct.priority = DMA_PRIORITY_ULTRA_HIGH;
-    dma_init(DMA0, DMA_CH3, &dma_init_struct);
+    UartInit(&Uart0, &uart_init);
+	UartCallbackRegister(&Uart0, &updateflag);
 
-    /* deinitialize DMA channel4 (USART0 rx) */
-    dma_deinit(DMA0, DMA_CH4);
-    dma_struct_para_init(&dma_init_struct);
-
-    dma_init_struct.direction = DMA_PERIPHERAL_TO_MEMORY;
-    dma_init_struct.memory_addr = (uint32_t)rxbuffer;
-    dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-    dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-    dma_init_struct.number = 10;
-    dma_init_struct.periph_addr = USART0_DATA_ADDRESS;
-    dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-    dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-    dma_init_struct.priority = DMA_PRIORITY_ULTRA_HIGH;
-    dma_init(DMA0, DMA_CH4, &dma_init_struct);
-
-    /* configure DMA mode */
-    dma_circulation_disable(DMA0, DMA_CH3);
-    dma_memory_to_memory_disable(DMA0, DMA_CH3);
-    dma_circulation_disable(DMA0, DMA_CH4);
-    dma_memory_to_memory_disable(DMA0, DMA_CH4);
-    
-    /* enable USART DMA for reception */
-    usart_dma_receive_config(USART0, USART_RECEIVE_DMA_ENABLE);
-    /* enable DMA0 channel4 transfer complete interrupt */
-    dma_interrupt_enable(DMA0, DMA_CH4, DMA_INT_FTF);
-    /* enable DMA0 channel4 */
-    dma_channel_enable(DMA0, DMA_CH4);
-    /* enable USART DMA for transmission */
-    usart_dma_transmit_config(USART0, USART_TRANSMIT_DMA_ENABLE);
-    /* enable DMA0 channel3 transfer complete interrupt */
-    dma_interrupt_enable(DMA0, DMA_CH3, DMA_INT_FTF);
-    /* enable DMA0 channel3 */
-    dma_channel_enable(DMA0, DMA_CH3);
-    
-    /* waiting for the transfer to complete*/
-    while(RESET == g_transfer_complete){
-    }
+    UartSendDMA(&Uart0, txbuffer, sizeof(txbuffer));
 	
-	GetSystemClock(&system_freq);
-	while(SetSystemClock(96000000));
-	GetSystemClock(&system_freq);
-	
-    
-    g_transfer_complete = RESET;
-
-    /* waiting for the transfer to complete*/
-    while(RESET == g_transfer_complete){
-    }
-
-    printf("\n\r%s\n\r", rxbuffer);
-
-    /* deinitialize DMA channel3(USART0 tx) */
-    dma_deinit(DMA0, DMA_CH3);
-    dma_struct_para_init(&dma_init_struct);
-
-    dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
-    dma_init_struct.memory_addr = (uint32_t)txbuffer;
-    dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-    dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-    dma_init_struct.number = ARRAYNUM(txbuffer);
-    dma_init_struct.periph_addr = USART0_DATA_ADDRESS;
-    dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-    dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-    dma_init_struct.priority = DMA_PRIORITY_ULTRA_HIGH;
-    dma_init(DMA0, DMA_CH3, &dma_init_struct);
-	
-//    /* configure DMA mode */
-//    dma_circulation_disable(DMA0, DMA_CH3);
-//    dma_memory_to_memory_disable(DMA0, DMA_CH3);
-	
-    /* enable USART DMA for transmission */
-//    usart_dma_transmit_config(USART0, USART_TRANSMIT_DMA_ENABLE);
-//    /* enable DMA0 channel3 transfer complete interrupt */
-//    dma_interrupt_enable(DMA0, DMA_CH3, DMA_INT_FTF);
-    /* enable DMA0 channel3 */
-    dma_channel_enable(DMA0, DMA_CH3);
+//	GetSystemClock(&system_freq);
+//	while(SetSystemClock(96000000));
+//	GetSystemClock(&system_freq);
 	
     while(1){
+		if(debug_control_flag == 1)
+		{
+			debug_control_flag = 0;
+			
+			send_time ++;
+			sprintf((char *)debug_control_buf, "control send %d times\n", send_time);
+			UartSendDMA(&Uart0, debug_control_buf, strlen((const char *)debug_control_buf));
+		}
     }
+	
 }
 
 /*!
