@@ -201,8 +201,6 @@ int8_t UartCallbackRegister(UartStruct *Uart, CallBackFunc func)
 
 void UartSendCompleteCallback(UartStruct *Uart)
 {
-	if(Uart0.call_back_func != 0)
-		(*Uart0.call_back_func)();
-	if(Uart1.call_back_func != 0)
-		(*Uart1.call_back_func)();
+	if(Uart->call_back_func != 0)
+		(*Uart->call_back_func)();
 }

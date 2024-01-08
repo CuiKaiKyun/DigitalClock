@@ -43,14 +43,21 @@ OF SUCH DAMAGE.
 
 __IO FlagStatus g_transfer_complete = RESET;
 uint8_t rxbuffer[10];
-const uint8_t txbuffer[] = "\n\rUSART DMA receive and transmit example, please input 10 bytes:\n\r";
+const uint8_t txbuffer[] = "\nUSART0 DMA transmit\n";
+const uint8_t txbuffer1[] = "\nUSART1 DMA transmit\n";
 uint32_t system_freq;
 
 uint8_t debug_control_flag = 0;
 uint8_t debug_callback_flag = 0;
 uint8_t debug_first_flag = 0;
-uint8_t debug_control_buf[30];
 uint16_t send_time = 0;
+uint8_t debug_control_buf[30];
+
+uint8_t debug_control_flag1 = 0;
+uint8_t debug_callback_flag1 = 0;
+uint8_t debug_first_flag1 = 0;
+uint16_t send_time1 = 0;
+uint8_t debug_control_buf1[30];
 
 void nvic_config(void);
 
@@ -62,6 +69,17 @@ static void updateflag(void)
 	{
 		debug_callback_flag = 1;
 		debug_control_flag = 1;
+	}
+}
+
+static void updateflag1(void)
+{
+	if(debug_first_flag1 == 0)
+		debug_first_flag1 = 1;
+	else
+	{
+		debug_callback_flag1 = 1;
+		debug_control_flag1 = 1;
 	}
 }
 
@@ -84,10 +102,15 @@ int main(void)
     uart_init.stop_bit = StopBit_1Bit;
     uart_init.word_length = WordLen_8Bit;
 
-    UartInit(&Uart1, &uart_init);
-	UartCallbackRegister(&Uart1, &updateflag);
+    UartInit(&Uart0, &uart_init);
+	UartCallbackRegister(&Uart0, &updateflag);
 
-    UartSendDMA(&Uart1, txbuffer, sizeof(txbuffer));
+    UartSendDMA(&Uart0, txbuffer, sizeof(txbuffer));
+
+    UartInit(&Uart1, &uart_init);
+	UartCallbackRegister(&Uart1, &updateflag1);
+
+    UartSendDMA(&Uart1, txbuffer1, sizeof(txbuffer1));
 	
 //	GetSystemClock(&system_freq);
 //	while(SetSystemClock(96000000));
@@ -99,8 +122,16 @@ int main(void)
 			debug_control_flag = 0;
 			
 			send_time ++;
-			sprintf((char *)debug_control_buf, "control send %d times\n", send_time);
-			UartSendDMA(&Uart1, debug_control_buf, strlen((const char *)debug_control_buf));
+			sprintf((char *)debug_control_buf, "uart0 control send %d times\n", send_time);
+			UartSendDMA(&Uart0, debug_control_buf, strlen((const char *)debug_control_buf));
+		}
+		if(debug_control_flag1 == 1)
+		{
+			debug_control_flag1 = 0;
+			
+			send_time1 ++;
+			sprintf((char *)debug_control_buf1, "uart1 control send %d times\n", send_time1);
+			UartSendDMA(&Uart1, debug_control_buf1, strlen((const char *)debug_control_buf1));
 		}
     }
 	

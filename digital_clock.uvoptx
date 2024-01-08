@@ -195,6 +195,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>debug_first_flag</ItemText>
         </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>debug_control_flag1</ItemText>
+        </Ww>
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>
