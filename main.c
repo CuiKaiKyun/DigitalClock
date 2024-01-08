@@ -84,10 +84,10 @@ int main(void)
     uart_init.stop_bit = StopBit_1Bit;
     uart_init.word_length = WordLen_8Bit;
 
-    UartInit(&Uart0, &uart_init);
-	UartCallbackRegister(&Uart0, &updateflag);
+    UartInit(&Uart1, &uart_init);
+	UartCallbackRegister(&Uart1, &updateflag);
 
-    UartSendDMA(&Uart0, txbuffer, sizeof(txbuffer));
+    UartSendDMA(&Uart1, txbuffer, sizeof(txbuffer));
 	
 //	GetSystemClock(&system_freq);
 //	while(SetSystemClock(96000000));
@@ -100,7 +100,7 @@ int main(void)
 			
 			send_time ++;
 			sprintf((char *)debug_control_buf, "control send %d times\n", send_time);
-			UartSendDMA(&Uart0, debug_control_buf, strlen((const char *)debug_control_buf));
+			UartSendDMA(&Uart1, debug_control_buf, strlen((const char *)debug_control_buf));
 		}
     }
 	

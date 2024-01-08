@@ -2,8 +2,6 @@
 #include "gd32f30x.h"
 #include "board_resource.h"
 
-#define USART0_DATA_ADDRESS    ((uint32_t)&USART_DATA(USART0))
-
 #define DRV_UARTn                             2U
 
 #define DRV_UART0                        USART0
@@ -20,12 +18,21 @@
 #define DRV_UART1_GPIO_PORT              GPIOA
 #define DRV_UART1_GPIO_CLK               RCU_GPIOA
 
+static uint32_t UART_PERIPH[DRV_UARTn] = {DRV_UART0, DRV_UART1};
 static rcu_periph_enum UART_CLK[DRV_UARTn] = {DRV_UART0_CLK, DRV_UART1_CLK};
+static rcu_periph_enum UART_DMA_CLK[DRV_UARTn] = {RCU_DMA0, RCU_DMA0};
+
 static uint32_t UART_TX_PIN[DRV_UARTn] = {DRV_UART0_TX_PIN, DRV_UART1_TX_PIN};
 static uint32_t UART_RX_PIN[DRV_UARTn] = {DRV_UART0_RX_PIN, DRV_UART1_RX_PIN};
 static uint32_t UART_GPIO_PORT[DRV_UARTn] = {DRV_UART0_GPIO_PORT, DRV_UART1_GPIO_PORT};
+
+static uint32_t UART_TX_DMA[DRV_UARTn] = {DMA0, DMA0};
+static uint32_t UART_TX_DMA_IRQ[DRV_UARTn] = {DMA0_Channel3_IRQn, DMA0_Channel6_IRQn};
+static dma_channel_enum UART_TX_DMA_CHL[DRV_UARTn] = {DMA_CH3, DMA_CH6};
+static uint32_t UART_RX_DMA[DRV_UARTn] = {DMA0, DMA0};
+static uint32_t UART_RX_DMA_IRQ[DRV_UARTn] = {DMA0_Channel4_IRQn, DMA0_Channel5_IRQn};
+static dma_channel_enum UART_RX_DMA_CHL[DRV_UARTn] = {DMA_CH4, DMA_CH5};
 static rcu_periph_enum UART_GPIO_CLK[DRV_UARTn] = {DRV_UART0_GPIO_CLK, DRV_UART1_GPIO_CLK};
-static uint32_t UART_PERIPH[DRV_UARTn] = {DRV_UART0, DRV_UART1};
 
 int8_t UartInit(UartStruct *Uart, UartInitStruct *Init)
 {
@@ -38,7 +45,7 @@ int8_t UartInit(UartStruct *Uart, UartInitStruct *Init)
     }
 
     /* enable DMA0 */
-    rcu_periph_clock_enable(RCU_DMA0);
+    rcu_periph_clock_enable(UART_DMA_CLK[uart_id]);
     
     /* enable GPIO clock */
     rcu_periph_clock_enable(UART_GPIO_CLK[uart_id]);
@@ -113,10 +120,10 @@ int8_t UartSendDMA(UartStruct *Uart, const uint8_t *data, uint16_t data_len)
     }
     
     /* enable dma irq */
-    nvic_irq_enable(DMA0_Channel3_IRQn, 0, 0);
+    nvic_irq_enable(UART_TX_DMA_IRQ[uart_id], 0, 0);
 
     /* deinitialize DMA channel3(USART0 tx) */
-    dma_deinit(DMA0, DMA_CH3);
+    dma_deinit(UART_TX_DMA[uart_id], UART_TX_DMA_CHL[uart_id]);
     dma_struct_para_init(&dma_init_struct);
 
     dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
@@ -124,21 +131,21 @@ int8_t UartSendDMA(UartStruct *Uart, const uint8_t *data, uint16_t data_len)
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
     dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
     dma_init_struct.number = data_len;
-    dma_init_struct.periph_addr = USART0_DATA_ADDRESS;
+    dma_init_struct.periph_addr = ((uint32_t)&USART_DATA(UART_PERIPH[uart_id]));
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
     dma_init_struct.priority = DMA_PRIORITY_ULTRA_HIGH;
-    dma_init(DMA0, DMA_CH3, &dma_init_struct);
+    dma_init(UART_TX_DMA[uart_id], UART_TX_DMA_CHL[uart_id], &dma_init_struct);
     
-    dma_circulation_disable(DMA0, DMA_CH3);
-    dma_memory_to_memory_disable(DMA0, DMA_CH3);
+    dma_circulation_disable(UART_TX_DMA[uart_id], UART_TX_DMA_CHL[uart_id]);
+    dma_memory_to_memory_disable(UART_TX_DMA[uart_id], UART_TX_DMA_CHL[uart_id]);
 
     /* enable USART DMA for transmission */
-    usart_dma_transmit_config(USART0, USART_TRANSMIT_DMA_ENABLE);
+    usart_dma_transmit_config(UART_PERIPH[uart_id], USART_TRANSMIT_DMA_ENABLE);
     /* enable DMA0 channel3 transfer complete interrupt */
-    dma_interrupt_enable(DMA0, DMA_CH3, DMA_INT_FTF);
+    dma_interrupt_enable(UART_TX_DMA[uart_id], UART_TX_DMA_CHL[uart_id], DMA_INT_FTF);
     /* enable DMA0 channel3 */
-    dma_channel_enable(DMA0, DMA_CH3);
+    dma_channel_enable(UART_TX_DMA[uart_id], UART_TX_DMA_CHL[uart_id]);
 
     return 0;
 }
@@ -153,7 +160,8 @@ int8_t UartReceiveToIdleDMA(UartStruct *Uart, uint8_t *data, uint16_t data_len)
     }else if(Uart == &Uart1){
         uart_id = 1U;
     }
-
+	// unused
+	uart_id = uart_id;
     /* enable dma irq */
     nvic_irq_enable(DMA0_Channel4_IRQn, 0, 1);
     
@@ -166,7 +174,7 @@ int8_t UartReceiveToIdleDMA(UartStruct *Uart, uint8_t *data, uint16_t data_len)
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
     dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
     dma_init_struct.number = data_len;
-    dma_init_struct.periph_addr = USART0_DATA_ADDRESS;
+    dma_init_struct.periph_addr = ((uint32_t)&USART_DATA(UART_PERIPH[uart_id]));
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
     dma_init_struct.priority = DMA_PRIORITY_ULTRA_HIGH;
@@ -193,14 +201,8 @@ int8_t UartCallbackRegister(UartStruct *Uart, CallBackFunc func)
 
 void UartSendCompleteCallback(UartStruct *Uart)
 {
-    uint8_t uart_id = 0U;
-
-    if(Uart == &Uart0){
-        uart_id = 0U;
-    }else if(Uart == &Uart1){
-        uart_id = 1U;
-    }
-	
 	if(Uart0.call_back_func != 0)
 		(*Uart0.call_back_func)();
+	if(Uart1.call_back_func != 0)
+		(*Uart1.call_back_func)();
 }

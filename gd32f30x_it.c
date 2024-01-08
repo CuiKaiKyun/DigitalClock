@@ -159,3 +159,31 @@ void DMA0_Channel4_IRQHandler(void)
         g_transfer_complete = SET;
     }
 }
+
+/*!
+    \brief      this function handles DMA0_Channel4_IRQHandler interrupt
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void DMA0_Channel5_IRQHandler(void)
+{
+    // if(dma_interrupt_flag_get(DMA0, DMA_CH4, DMA_INT_FLAG_FTF)) {
+    //     dma_interrupt_flag_clear(DMA0, DMA_CH4, DMA_INT_FLAG_G);
+    //     g_transfer_complete = SET;
+    // }
+}
+
+/*!
+    \brief      this function handles DMA0_Channel3_IRQHandler interrupt
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void DMA0_Channel6_IRQHandler(void)
+{
+    if(dma_interrupt_flag_get(DMA0, DMA_CH6, DMA_INT_FLAG_FTF)) {
+        dma_interrupt_flag_clear(DMA0, DMA_CH6, DMA_INT_FLAG_G);
+		UartSendCompleteCallback(&Uart1);
+    }
+}
