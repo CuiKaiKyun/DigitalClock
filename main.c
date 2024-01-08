@@ -42,7 +42,7 @@ OF SUCH DAMAGE.
 #include "driver.h"
 
 __IO FlagStatus g_transfer_complete = RESET;
-uint8_t rxbuffer[10];
+uint8_t rx_dma_buffer[10];
 const uint8_t txbuffer[] = "\nUSART0 DMA transmit\n";
 const uint8_t txbuffer1[] = "\nUSART1 DMA transmit\n";
 uint32_t system_freq;
@@ -111,6 +111,9 @@ int main(void)
 	UartCallbackRegister(&Uart1, &updateflag1);
 
     UartSendDMA(&Uart1, txbuffer1, sizeof(txbuffer1));
+	
+	UartReceiveToIdleDMA(&Uart0, rx_dma_buffer, sizeof(rx_dma_buffer));
+	UartReceiveToIdleDMA(&Uart1, rx_dma_buffer, sizeof(rx_dma_buffer));
 	
 //	GetSystemClock(&system_freq);
 //	while(SetSystemClock(96000000));
