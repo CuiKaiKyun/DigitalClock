@@ -143,15 +143,8 @@ void USART0_IRQHandler(void)
     if(RESET != usart_interrupt_flag_get(USART0, USART_INT_FLAG_IDLE)){
         /* clear IDLE flag */
         usart_data_receive(USART0);
-        
-        /* number of data received */
-//        rx_count = 256 - (dma_transfer_number_get(DMA0, DMA_CH4));
-//        receive_flag = 1;
-        
-        /* disable DMA and reconfigure */
-        dma_channel_disable(DMA0, DMA_CH4);
-//        dma_transfer_number_config(DMA0, DMA_CH4, 256);
-//        dma_channel_enable(DMA0, DMA_CH4);
+		
+        UartReceiveIdleCallback(&Uart0);
     }
 }
 
@@ -167,14 +160,7 @@ void USART1_IRQHandler(void)
         /* clear IDLE flag */
         usart_data_receive(USART1);
         
-        /* number of data received */
-//        rx_count = 256 - (dma_transfer_number_get(DMA0, DMA_CH4));
-//        receive_flag = 1;
-        
-        /* disable DMA and reconfigure */
-        dma_channel_disable(DMA0, DMA_CH5);
-//        dma_transfer_number_config(DMA0, DMA_CH4, 256);
-//        dma_channel_enable(DMA0, DMA_CH4);
+        UartReceiveIdleCallback(&Uart1);
     }
 }
 
@@ -214,10 +200,10 @@ void DMA0_Channel4_IRQHandler(void)
 */
 void DMA0_Channel5_IRQHandler(void)
 {
-    // if(dma_interrupt_flag_get(DMA0, DMA_CH4, DMA_INT_FLAG_FTF)) {
-    //     dma_interrupt_flag_clear(DMA0, DMA_CH4, DMA_INT_FLAG_G);
-    //     g_transfer_complete = SET;
-    // }
+	if(dma_interrupt_flag_get(DMA0, DMA_CH4, DMA_INT_FLAG_FTF)) {
+		dma_interrupt_flag_clear(DMA0, DMA_CH4, DMA_INT_FLAG_G);
+		g_transfer_complete = SET;
+    }
 }
 
 /*!

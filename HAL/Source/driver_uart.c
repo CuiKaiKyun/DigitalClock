@@ -1,3 +1,4 @@
+#include "stddef.h"
 #include "driver_uart.h"
 #include "gd32f30x.h"
 #include "board_resource.h"
@@ -40,9 +41,22 @@ static IRQn_Type UART_RX_DMA_IRQ[DRV_UARTn] = {DMA0_Channel4_IRQn, DMA0_Channel5
 static IRQn_Type UART_IRQ[DRV_UARTn] = {USART0_IRQn, USART1_IRQn};
 static dma_channel_enum UART_RX_DMA_CHL[DRV_UARTn] = {DMA_CH4, DMA_CH5};
 
+// DEBUG
+#ifdef DEBUG
+struct UartDebugInfo
+{
+    uint8_t receive_fail;
+	uint16_t last_receive_len;
+};
+struct UartDebugInfo uart_debug_info = {0};
+#endif
+
 int8_t UartInit(UartStruct *Uart, UartInitStruct *Init)
 {
     uint8_t uart_id = 0U;
+
+    Uart->receive_info.dma_total_len = 0;
+    Uart->receive_info.receive_start = 0;
     
     if(Uart == &Uart0){
         uart_id = 0U;
@@ -161,6 +175,14 @@ int8_t UartReceiveToIdleDMA(UartStruct *Uart, uint8_t *data, uint16_t data_len)
     dma_parameter_struct dma_init_struct;
     uint8_t uart_id = 0U;
 
+    if(Uart->receive_info.receive_start == 1)
+    {
+#ifdef DEBUG
+        uart_debug_info.receive_fail++;
+#endif
+        return -1;
+    }
+
     if(Uart == &Uart0){
         uart_id = 0U;
     }else if(Uart == &Uart1){
@@ -200,17 +222,60 @@ int8_t UartReceiveToIdleDMA(UartStruct *Uart, uint8_t *data, uint16_t data_len)
     /* enable DMA0 channel4 */
     dma_channel_enable(UART_RX_DMA[uart_id], UART_RX_DMA_CHL[uart_id]);
 
+    Uart->receive_info.dma_total_len = data_len;
+    Uart->receive_info.receive_start = 1;
+
     return 0;
 }
 
-int8_t UartCallbackRegister(UartStruct *Uart, CallBackFunc func)
+int8_t UartSendCallbackRegister(UartStruct *Uart, UartSendCpltFunc func)
 {
-	Uart->call_back_func = func;
+    if(func != NULL)
+	    Uart->send_cplt_call_back = func;
+	return 0;
+}
+
+int8_t UartRecvCallbackRegister(UartStruct *Uart, UartRecvIdleFunc func)
+{
+    if(func != NULL)
+	    Uart->recv_idle_call_back = func;
 	return 0;
 }
 
 void UartSendCompleteCallback(UartStruct *Uart)
 {
-	if(Uart->call_back_func != 0)
-		(*Uart->call_back_func)();
+    Uart->send_info.send_start = 0;
+    
+	if(Uart->send_cplt_call_back != NULL)
+		(*Uart->send_cplt_call_back)();
+}
+
+void UartReceiveIdleCallback(UartStruct *Uart)
+{
+    uint16_t data_lenth;
+    uint8_t uart_id = 0U;
+	
+	/* record receive end */
+    Uart->receive_info.receive_start = 0;
+	
+    if(Uart == &Uart0){
+        uart_id = 0U;
+    }else if(Uart == &Uart1){
+        uart_id = 1U;
+    }
+	
+    /* disable USART IDLE interrupt */
+    usart_interrupt_disable(UART_PERIPH[uart_id], USART_INT_IDLE);
+	/* disable DMA and reconfigure */
+	dma_channel_disable(UART_RX_DMA[uart_id], UART_RX_DMA_CHL[uart_id]);
+
+    data_lenth = Uart->receive_info.dma_total_len - \
+		(dma_transfer_number_get(UART_RX_DMA[uart_id], UART_RX_DMA_CHL[uart_id]));
+	
+#ifdef DEBUG
+	uart_debug_info.last_receive_len = data_lenth;
+#endif
+	
+	if(Uart->recv_idle_call_back != NULL)
+		(*Uart->recv_idle_call_back)(data_lenth);
 }

@@ -148,89 +148,55 @@
           <Name>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32F30x_HD -FS08000000 -FL040000 -FP0($$Device:GD32F303CC$Flash\GD32F30x_HD.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-          <LineNumber>166</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134218538</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\gd32f30x_it.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\digital_clock\gd32f30x_it.c\166</Expression>
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>system_clock,0x0A</ItemText>
+          <ItemText>uart_debug_info</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>APB1_clock,0x0A</ItemText>
+          <ItemText>uart_debug_info,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>APB2_clock,0x0A</ItemText>
+          <ItemText>UART_TX_PIN[2U]</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>AHB_clock,0x0A</ItemText>
+          <ItemText>rx_dma_buffer[10]</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>system_freq,0x0A</ItemText>
+          <ItemText>rx_dma_buffer</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>send_time</ItemText>
-        </Ww>
-        <Ww>
-          <count>6</count>
-          <WinNumber>1</WinNumber>
           <ItemText>debug_control_flag</ItemText>
-        </Ww>
-        <Ww>
-          <count>7</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>uart_init,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>8</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>debug_first_flag</ItemText>
-        </Ww>
-        <Ww>
-          <count>9</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>debug_control_flag1</ItemText>
-        </Ww>
-        <Ww>
-          <count>10</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>rx_dma_buffer</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>8</SubType>
-          <ItemText>0x20000058</ItemText>
+          <ItemText>0x20000060</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
+      <MemoryWindow2>
+        <Mm>
+          <WinNumber>2</WinNumber>
+          <SubType>0</SubType>
+          <ItemText>0x2000005a</ItemText>
+          <AccSizeX>0</AccSizeX>
+        </Mm>
+      </MemoryWindow2>
       <Tracepoint>
         <THDelay>0</THDelay>
       </Tracepoint>
@@ -279,6 +245,10 @@
           <WinId>35905</WinId>
         </Entry>
         <Entry>
+          <Name>System Viewer\USART0</Name>
+          <WinId>35903</WinId>
+        </Entry>
+        <Entry>
           <Name>System Viewer\USART1</Name>
           <WinId>35904</WinId>
         </Entry>
@@ -320,7 +290,7 @@
 
   <Group>
     <GroupName>Peripherals</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

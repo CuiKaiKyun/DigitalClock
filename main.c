@@ -48,39 +48,38 @@ const uint8_t txbuffer1[] = "\nUSART1 DMA transmit\n";
 uint32_t system_freq;
 
 uint8_t debug_control_flag = 0;
-uint8_t debug_callback_flag = 0;
-uint8_t debug_first_flag = 0;
 uint16_t send_time = 0;
-uint8_t debug_control_buf[30];
+uint8_t debug_buf[30];
 
 uint8_t debug_control_flag1 = 0;
-uint8_t debug_callback_flag1 = 0;
-uint8_t debug_first_flag1 = 0;
 uint16_t send_time1 = 0;
-uint8_t debug_control_buf1[30];
+uint8_t debug_buf1[30];
 
 void nvic_config(void);
 
 static void updateflag(void)
 {
-	if(debug_first_flag == 0)
-		debug_first_flag = 1;
-	else
-	{
-		debug_callback_flag = 1;
-		debug_control_flag = 1;
-	}
 }
 
 static void updateflag1(void)
 {
-	if(debug_first_flag1 == 0)
-		debug_first_flag1 = 1;
-	else
-	{
-		debug_callback_flag1 = 1;
-		debug_control_flag1 = 1;
-	}
+}
+
+static void restart_receive(uint16_t data_len)
+{
+	send_time ++;
+	sprintf((char *)debug_buf, "uart0 recv %d times\n\r", send_time);
+    UartSendDMA(&Uart0, debug_buf, strlen((const char *)debug_buf));
+
+	UartReceiveToIdleDMA(&Uart0, rx_dma_buffer, sizeof(rx_dma_buffer));
+}
+
+static void restart_receive1(uint16_t data_len)
+{
+	send_time1 ++;
+	sprintf((char *)debug_buf1, "uart1 recv %d times\n\r", send_time1);
+    UartSendDMA(&Uart1, debug_buf1, strlen((const char *)debug_buf1));
+	UartReceiveToIdleDMA(&Uart1, rx_dma_buffer, sizeof(rx_dma_buffer));
 }
 
 /*!
@@ -103,12 +102,14 @@ int main(void)
     uart_init.word_length = WordLen_8Bit;
 
     UartInit(&Uart0, &uart_init);
-	UartCallbackRegister(&Uart0, &updateflag);
+	UartSendCallbackRegister(&Uart0, &updateflag);
+    UartRecvCallbackRegister(&Uart0, &restart_receive);
 
     UartSendDMA(&Uart0, txbuffer, sizeof(txbuffer));
 
     UartInit(&Uart1, &uart_init);
-	UartCallbackRegister(&Uart1, &updateflag1);
+	UartSendCallbackRegister(&Uart1, &updateflag1);
+    UartRecvCallbackRegister(&Uart1, &restart_receive1);
 
     UartSendDMA(&Uart1, txbuffer1, sizeof(txbuffer1));
 	
@@ -123,18 +124,10 @@ int main(void)
 		if(debug_control_flag == 1)
 		{
 			debug_control_flag = 0;
-			
-			send_time ++;
-			sprintf((char *)debug_control_buf, "uart0 control send %d times\n", send_time);
-			UartSendDMA(&Uart0, debug_control_buf, strlen((const char *)debug_control_buf));
 		}
 		if(debug_control_flag1 == 1)
 		{
 			debug_control_flag1 = 0;
-			
-			send_time1 ++;
-			sprintf((char *)debug_control_buf1, "uart1 control send %d times\n", send_time1);
-			UartSendDMA(&Uart1, debug_control_buf1, strlen((const char *)debug_control_buf1));
 		}
     }
 	

@@ -22,13 +22,25 @@ typedef struct __UartInitStruct
 
 }UartInitStruct;
 
-typedef void (*CallBackFunc)(void);
+typedef void (*UartSendCpltFunc)(void);
+typedef void (*UartRecvIdleFunc)(uint16_t data_lenth);
 
 typedef struct __UartStruct
 {
     UartInitStruct Init;
 	
-	CallBackFunc call_back_func;
+    struct 
+    {
+        uint8_t send_start;
+    }send_info;
+	
+    struct 
+    {
+        uint8_t receive_start;
+        uint16_t dma_total_len;
+    }receive_info;
+	UartSendCpltFunc send_cplt_call_back;
+    UartRecvIdleFunc recv_idle_call_back;
 }UartStruct;
 
 int8_t UartInit(UartStruct *Uart, UartInitStruct *Init);
@@ -37,7 +49,11 @@ int8_t UartSendDMA(UartStruct *Uart, const uint8_t *data, uint16_t data_len);
 
 int8_t UartReceiveToIdleDMA(UartStruct *Uart, uint8_t *data, uint16_t data_len);
 
-int8_t UartCallbackRegister(UartStruct *Uart, CallBackFunc func);
+int8_t UartSendCallbackRegister(UartStruct *Uart, UartSendCpltFunc func);
+
+int8_t UartRecvCallbackRegister(UartStruct *Uart, UartRecvIdleFunc func);
 
 void UartSendCompleteCallback(UartStruct *Uart);
+
+void UartReceiveIdleCallback(UartStruct *Uart);
 

@@ -18,6 +18,8 @@
                 "d:\\Project\\DigitalClock\\Software\\HAL\\Source"
             ],
             "defines": [
+                "GD32F30X_HD",
+                "DEBUG",
                 "__CC_ARM",
                 "__arm__",
                 "__align(x)=",

@@ -171,7 +171,7 @@
             <AdsLtoi>1</AdsLtoi>
             <AdsLsun>0</AdsLsun>
             <AdsLven>1</AdsLven>
-            <AdsLsxf>0</AdsLsxf>
+            <AdsLsxf>1</AdsLsxf>
             <RvctClst>0</RvctClst>
             <GenPPlst>0</GenPPlst>
             <AdsCpuType>"Cortex-M4"</AdsCpuType>
@@ -337,7 +337,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define></Define>
+              <Define>GD32F30X_HD DEBUG</Define>
               <Undefine></Undefine>
               <IncludePath>.\GD32F30x_standard_peripheral\Include;.\CMSIS\GD\GD32F30x\Include;.\CMSIS;..\Software;.\Utilities;.\HAL\Include;.\HAL</IncludePath>
             </VariousControls>
