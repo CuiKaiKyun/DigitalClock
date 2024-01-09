@@ -132,6 +132,51 @@ void PendSV_Handler(void)
 {
 }
 
+uint8_t debug_bit = 0;
+/*!
+    \brief      this function handles TIMER0 interrupt request
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void TIMER0_UP_IRQHandler(void)
+{
+	if(debug_bit == 0)
+	{
+		debug_bit = 1;
+		gpio_bit_set(GPIOA, GPIO_PIN_2);
+	}
+	else
+	{
+		debug_bit = 0;
+		gpio_bit_reset(GPIOA, GPIO_PIN_2);
+	}
+		
+    timer_interrupt_flag_clear(TIMER0, TIMER_INT_FLAG_UP);
+}
+
+/*!
+    \brief      this function handles TIMER0 interrupt request
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void TIMER5_IRQHandler(void)
+{
+	if(debug_bit == 0)
+	{
+		debug_bit = 1;
+		gpio_bit_set(GPIOA, GPIO_PIN_2);
+	}
+	else
+	{
+		debug_bit = 0;
+		gpio_bit_reset(GPIOA, GPIO_PIN_2);
+	}
+	
+    timer_interrupt_flag_clear(TIMER5, TIMER_INT_FLAG_UP);
+}
+
 /*!
     \brief      this function handles USART interrupt request
     \param[in]  none

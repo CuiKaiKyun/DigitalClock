@@ -171,7 +171,7 @@
             <AdsLtoi>1</AdsLtoi>
             <AdsLsun>0</AdsLsun>
             <AdsLven>1</AdsLven>
-            <AdsLsxf>1</AdsLsxf>
+            <AdsLsxf>0</AdsLsxf>
             <RvctClst>0</RvctClst>
             <GenPPlst>0</GenPPlst>
             <AdsCpuType>"Cortex-M4"</AdsCpuType>
@@ -639,17 +639,15 @@
               <FileType>1</FileType>
               <FilePath>.\HAL\Source\driver_uart.c</FilePath>
             </File>
+            <File>
+              <FileName>driver_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\HAL\Source\driver_timer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>Utilities</GroupName>
-          <Files>
-            <File>
-              <FileName>gd32f307c_eval.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Utilities\gd32f307c_eval.c</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>Board</GroupName>

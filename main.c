@@ -91,10 +91,16 @@ static void restart_receive1(uint16_t data_len)
 int main(void)
 {
     UartInitStruct uart_init;
+	TimerInitStruct timer_init;
 	
+	// LED PB12
 	rcu_periph_clock_enable(RCU_GPIOB);
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ,GPIO_PIN_12);
     gpio_bit_reset(GPIOB, GPIO_PIN_12);
+	
+	// debug PA2
+	rcu_periph_clock_enable(RCU_GPIOA);
+    gpio_init(GPIOA, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ,GPIO_PIN_2);
 	
     uart_init.baudrate = 115200;
     uart_init.parity = ParityNone;
@@ -107,14 +113,17 @@ int main(void)
 
     UartSendDMA(&Uart0, txbuffer, sizeof(txbuffer));
 
-    UartInit(&Uart1, &uart_init);
-	UartSendCallbackRegister(&Uart1, &updateflag1);
-    UartRecvCallbackRegister(&Uart1, &restart_receive1);
+//    UartInit(&Uart1, &uart_init);
+//	UartSendCallbackRegister(&Uart1, &updateflag1);
+//    UartRecvCallbackRegister(&Uart1, &restart_receive1);
 
-    UartSendDMA(&Uart1, txbuffer1, sizeof(txbuffer1));
+//    UartSendDMA(&Uart1, txbuffer1, sizeof(txbuffer1));
 	
 	UartReceiveToIdleDMA(&Uart0, rx_dma_buffer, sizeof(rx_dma_buffer));
-	UartReceiveToIdleDMA(&Uart1, rx_dma_buffer, sizeof(rx_dma_buffer));
+//	UartReceiveToIdleDMA(&Uart1, rx_dma_buffer, sizeof(rx_dma_buffer));
+	
+	timer_init.update_time_us = 1000;
+	TimerInit(&Timer0, &timer_init);
 	
 //	GetSystemClock(&system_freq);
 //	while(SetSystemClock(96000000));
