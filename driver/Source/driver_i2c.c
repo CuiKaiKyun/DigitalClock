@@ -192,6 +192,7 @@ void I2cEventCallback(I2cStruct *i2c)
                         i2c_interrupt_disable(I2C_PERIPH[i2c->i2c_id], I2C_INT_ERR);
                         i2c_interrupt_disable(I2C_PERIPH[i2c->i2c_id], I2C_INT_BUF);
                         i2c_interrupt_disable(I2C_PERIPH[i2c->i2c_id], I2C_INT_EV);
+
                         i2c->read_info.reading = 0;
                     }
                 }

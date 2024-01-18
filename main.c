@@ -46,9 +46,11 @@ __IO FlagStatus g_transfer_complete = RESET;
 uint8_t rx_dma_buffer[10];
 const uint8_t txbuffer[] = "\nUSART0 DMA transmit\n";
 const uint8_t txbuffer1[] = "\nUSART1 DMA transmit\n";
-uint8_t i2c_write_buf[] = {0x00, 0x50, 0x59, 0x13, 0x10, 0x18, 0x01, 0x24};
-uint8_t i2c_read_buf[7];
+uint8_t i2c_write_buf[] = {0x2C, 0x06};
+uint8_t i2c_read_buf[16];
 uint32_t system_freq;
+uint32_t temp;
+float degree;
 
 uint8_t debug_control_flag = 0;
 uint16_t send_time = 0;
@@ -109,9 +111,6 @@ int main(void)
     i2c_init.speed = 100000;
     i2c_init.local_addr = 0x47;
     I2cInit(&I2c0, &i2c_init);
-    while(I2cWrite(&I2c0, 0x64, i2c_write_buf, sizeof(i2c_write_buf)) != 0);
-    while(I2cWrite(&I2c0, 0x64, &rd_wr_addr, 1) != 0);
-    while(I2cRead(&I2c0, 0x64, i2c_read_buf, sizeof(i2c_read_buf)) != 0);
     
 //  GetSystemClock(&system_freq);
 //  while(SetSystemClock(96000000));
@@ -136,12 +135,21 @@ int main(void)
                 led = 0;
                 gpio_bit_reset(GPIOB, GPIO_PIN_12);
             }
+            
+            while(I2cWrite(&I2c0, 0x6c, &rd_wr_addr, sizeof(rd_wr_addr)) != 0);
+            while(I2cRead(&I2c0, 0x6c, i2c_read_buf, sizeof(i2c_read_buf)) != 0);
+            while(I2c0.read_info.reading == 1);
+            temp = i2c_read_buf[14]<<8|i2c_read_buf[15];
+            degree = temp*360.f/4096;
         }
         
         if(debug_control_flag == 1)
         {
-            while(I2cWrite(&I2c0, 0x64, &rd_wr_addr, 1) != 0);
-            while(I2cRead(&I2c0, 0x64, i2c_read_buf, sizeof(i2c_read_buf)) != 0);
+            while(I2cWrite(&I2c0, 0x6c, &rd_wr_addr, sizeof(rd_wr_addr)) != 0);
+            while(I2cRead(&I2c0, 0x6c, i2c_read_buf, sizeof(i2c_read_buf)) != 0);
+            while(I2c0.read_info.reading == 1);
+            temp = i2c_read_buf[14]<<8|i2c_read_buf[15];
+            degree = temp*360.f/4096;
             debug_control_flag = 0;
         }
     }
