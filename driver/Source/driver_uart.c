@@ -1,7 +1,7 @@
 #include "stddef.h"
 #include "driver_uart.h"
 #include "gd32f30x.h"
-#include "board_resource.h"
+#include "chip_resource.h"
 
 #define DRV_UARTn                             2U
 
@@ -54,6 +54,11 @@ struct UartDebugInfo uart_debug_info = {0};
 int8_t UartInit(UartStruct *Uart, UartInitStruct *Init)
 {
     uint8_t uart_id = 0U;
+
+    if(Uart->inited != 0){
+        return 0;
+    }
+    Uart->inited = 1;
 
     Uart->receive_info.dma_total_len = 0;
     Uart->receive_info.receive_start = 0;
@@ -244,7 +249,7 @@ int8_t UartRecvCallbackRegister(UartStruct *Uart, UartRecvIdleFunc func)
 
 void UartSendCompleteCallback(UartStruct *Uart)
 {
-    Uart->send_info.send_start = 0;
+    Uart->send_info.send_busy = 0;
     
 	if(Uart->send_cplt_call_back != NULL)
 		(*Uart->send_cplt_call_back)();

@@ -28,10 +28,12 @@ typedef void (*UartRecvIdleFunc)(uint16_t data_lenth);
 typedef struct __UartStruct
 {
     UartInitStruct Init;
+
+    uint8_t inited;
 	
     struct 
     {
-        uint8_t send_start;
+        uint8_t send_busy;
     }send_info;
 	
     struct 

@@ -132,7 +132,6 @@ void PendSV_Handler(void)
 {
 }
 
-uint8_t debug_bit = 0;
 /*!
     \brief      this function handles TIMER0 interrupt request
     \param[in]  none
@@ -141,18 +140,11 @@ uint8_t debug_bit = 0;
 */
 void TIMER0_UP_IRQHandler(void)
 {
-	if(debug_bit == 0)
-	{
-		debug_bit = 1;
-		gpio_bit_set(GPIOA, GPIO_PIN_2);
-	}
-	else
-	{
-		debug_bit = 0;
-		gpio_bit_reset(GPIOA, GPIO_PIN_2);
-	}
-		
-    timer_interrupt_flag_clear(TIMER0, TIMER_INT_FLAG_UP);
+    if(timer_interrupt_flag_get(TIMER0, TIMER_INT_FLAG_UP) == SET)
+    {
+        timer_interrupt_flag_clear(TIMER0, TIMER_INT_FLAG_UP);
+        TimerUpdateCallback(&Timer0);
+    }
 }
 
 /*!
@@ -163,18 +155,11 @@ void TIMER0_UP_IRQHandler(void)
 */
 void TIMER5_IRQHandler(void)
 {
-	if(debug_bit == 0)
-	{
-		debug_bit = 1;
-		gpio_bit_set(GPIOA, GPIO_PIN_2);
-	}
-	else
-	{
-		debug_bit = 0;
-		gpio_bit_reset(GPIOA, GPIO_PIN_2);
-	}
-	
-    timer_interrupt_flag_clear(TIMER5, TIMER_INT_FLAG_UP);
+    if(timer_interrupt_flag_get(TIMER5, TIMER_INT_FLAG_UP) == SET)
+    {
+        timer_interrupt_flag_clear(TIMER5, TIMER_INT_FLAG_UP);
+        TimerUpdateCallback(&Timer5);
+    }
 }
 
 /*!
@@ -207,6 +192,50 @@ void USART1_IRQHandler(void)
         
         UartReceiveIdleCallback(&Uart1);
     }
+}
+
+/*!
+    \brief      this function handles I2C0 event interrupt request exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void I2C0_EV_IRQHandler(void)
+{
+    I2cEventCallback(&I2c0);
+}
+
+/*!
+    \brief      this function handles I2C0 error interrupt request exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void I2C0_ER_IRQHandler(void)
+{
+    I2cErrorCallback(&I2c0);
+}
+
+/*!
+    \brief      this function handles I2C0 event interrupt request exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void I2C1_EV_IRQHandler(void)
+{
+    I2cEventCallback(&I2c1);
+}
+
+/*!
+    \brief      this function handles I2C0 error interrupt request exception
+    \param[in]  none
+    \param[out] none
+    \retval     none
+*/
+void I2C1_ER_IRQHandler(void)
+{
+    I2cErrorCallback(&I2c1);
 }
 
 /*!
@@ -245,9 +274,9 @@ void DMA0_Channel4_IRQHandler(void)
 */
 void DMA0_Channel5_IRQHandler(void)
 {
-	if(dma_interrupt_flag_get(DMA0, DMA_CH4, DMA_INT_FLAG_FTF)) {
-		dma_interrupt_flag_clear(DMA0, DMA_CH4, DMA_INT_FLAG_G);
-		g_transfer_complete = SET;
+    if(dma_interrupt_flag_get(DMA0, DMA_CH4, DMA_INT_FLAG_FTF)) {
+        dma_interrupt_flag_clear(DMA0, DMA_CH4, DMA_INT_FLAG_G);
+        g_transfer_complete = SET;
     }
 }
 
@@ -261,6 +290,6 @@ void DMA0_Channel6_IRQHandler(void)
 {
     if(dma_interrupt_flag_get(DMA0, DMA_CH6, DMA_INT_FLAG_FTF)) {
         dma_interrupt_flag_clear(DMA0, DMA_CH6, DMA_INT_FLAG_G);
-		UartSendCompleteCallback(&Uart1);
+        UartSendCompleteCallback(&Uart1);
     }
 }

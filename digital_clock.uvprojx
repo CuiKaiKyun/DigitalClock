@@ -48,14 +48,14 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>.\Objects\</OutputDirectory>
+          <OutputDirectory>.\build\</OutputDirectory>
           <OutputName>digital_clock</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath>.\Listings\</ListingPath>
+          <ListingPath>.\build\Listing\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>
@@ -325,7 +325,7 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>GD32F30X_HD DEBUG</Define>
               <Undefine></Undefine>
-              <IncludePath>.\GD32F30x_standard_peripheral\Include;.\CMSIS\GD\GD32F30x\Include;.\CMSIS;..\Software;.\Utilities;.\HAL\Include;.\HAL</IncludePath>
+              <IncludePath>.\GD32F30x_standard_peripheral\Include;.\CMSIS\GD\GD32F30x\Include;.\CMSIS;..\Software;.\driver;.\driver\Include;.\common\easy_log;.\common\system_timer;.\common\system_timer</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -627,35 +627,62 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>HAL</GroupName>
+          <GroupName>drivers</GroupName>
           <Files>
             <File>
               <FileName>driver_rcc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\HAL\Source\driver_rcc.c</FilePath>
-            </File>
-            <File>
-              <FileName>driver_uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\HAL\Source\driver_uart.c</FilePath>
+              <FilePath>.\driver\Source\driver_rcc.c</FilePath>
             </File>
             <File>
               <FileName>driver_timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\HAL\Source\driver_timer.c</FilePath>
+              <FilePath>.\driver\Source\driver_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>driver_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\driver\Source\driver_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>chip_resource.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\driver\chip_resource.c</FilePath>
+            </File>
+            <File>
+              <FileName>driver_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\driver\Source\driver_i2c.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>Utilities</GroupName>
-        </Group>
-        <Group>
-          <GroupName>Board</GroupName>
+          <GroupName>common</GroupName>
           <Files>
             <File>
-              <FileName>board_resource.c</FileName>
+              <FileName>elog.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\HAL\board_resource.c</FilePath>
+              <FilePath>.\common\easy_log\elog.c</FilePath>
+            </File>
+            <File>
+              <FileName>elog_buf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\common\easy_log\elog_buf.c</FilePath>
+            </File>
+            <File>
+              <FileName>elog_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\common\easy_log\elog_port.c</FilePath>
+            </File>
+            <File>
+              <FileName>elog_utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\common\easy_log\elog_utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>system_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\common\system_timer\system_timer.c</FilePath>
             </File>
           </Files>
         </Group>

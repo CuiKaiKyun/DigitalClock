@@ -38,13 +38,16 @@ OF SUCH DAMAGE.
 #include "gd32f30x.h"
 #include <stdio.h>
 #include <string.h>
-#include "gd32f307c_eval.h"
 #include "driver.h"
+#include "elog.h"
+#include "system_timer.h"
 
 __IO FlagStatus g_transfer_complete = RESET;
 uint8_t rx_dma_buffer[10];
 const uint8_t txbuffer[] = "\nUSART0 DMA transmit\n";
 const uint8_t txbuffer1[] = "\nUSART1 DMA transmit\n";
+uint8_t i2c_write_buf[] = {0x00, 0x50, 0x59, 0x13, 0x10, 0x18, 0x01, 0x24};
+uint8_t i2c_read_buf[7];
 uint32_t system_freq;
 
 uint8_t debug_control_flag = 0;
@@ -55,31 +58,19 @@ uint8_t debug_control_flag1 = 0;
 uint16_t send_time1 = 0;
 uint8_t debug_buf1[30];
 
-void nvic_config(void);
-
-static void updateflag(void)
-{
-}
+static void elog(void);
 
 static void updateflag1(void)
 {
-}
-
-static void restart_receive(uint16_t data_len)
-{
-	send_time ++;
-	sprintf((char *)debug_buf, "uart0 recv %d times\n\r", send_time);
-    UartSendDMA(&Uart0, debug_buf, strlen((const char *)debug_buf));
-
-	UartReceiveToIdleDMA(&Uart0, rx_dma_buffer, sizeof(rx_dma_buffer));
+    
 }
 
 static void restart_receive1(uint16_t data_len)
 {
-	send_time1 ++;
-	sprintf((char *)debug_buf1, "uart1 recv %d times\n\r", send_time1);
+    send_time1 ++;
+    sprintf((char *)debug_buf1, "uart1 recv %d time\b\bs\n\r", send_time1);
     UartSendDMA(&Uart1, debug_buf1, strlen((const char *)debug_buf1));
-	UartReceiveToIdleDMA(&Uart1, rx_dma_buffer, sizeof(rx_dma_buffer));
+    UartReceiveToIdleDMA(&Uart1, rx_dma_buffer, sizeof(rx_dma_buffer));
 }
 
 /*!
@@ -91,73 +82,82 @@ static void restart_receive1(uint16_t data_len)
 int main(void)
 {
     UartInitStruct uart_init;
-	TimerInitStruct timer_init;
-	
-	// LED PB12
-	rcu_periph_clock_enable(RCU_GPIOB);
+    I2cInitStruct i2c_init;
+    uint8_t rd_wr_addr = 0;
+    
+    // LED PB12
+    rcu_periph_clock_enable(RCU_GPIOB);
     gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ,GPIO_PIN_12);
     gpio_bit_reset(GPIOB, GPIO_PIN_12);
-	
-	// debug PA2
-	rcu_periph_clock_enable(RCU_GPIOA);
-    gpio_init(GPIOA, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ,GPIO_PIN_2);
-	
+    
     uart_init.baudrate = 115200;
     uart_init.parity = ParityNone;
     uart_init.stop_bit = StopBit_1Bit;
     uart_init.word_length = WordLen_8Bit;
+    
+    SystemTimerInit();
 
-    UartInit(&Uart0, &uart_init);
-	UartSendCallbackRegister(&Uart0, &updateflag);
-    UartRecvCallbackRegister(&Uart0, &restart_receive);
+    elog();
+    
+    UartInit(&Uart1, &uart_init);
+    UartSendCallbackRegister(&Uart1, &updateflag1);
+    UartRecvCallbackRegister(&Uart1, &restart_receive1);
 
-    UartSendDMA(&Uart0, txbuffer, sizeof(txbuffer));
-
-//    UartInit(&Uart1, &uart_init);
-//	UartSendCallbackRegister(&Uart1, &updateflag1);
-//    UartRecvCallbackRegister(&Uart1, &restart_receive1);
-
-//    UartSendDMA(&Uart1, txbuffer1, sizeof(txbuffer1));
-	
-	UartReceiveToIdleDMA(&Uart0, rx_dma_buffer, sizeof(rx_dma_buffer));
-//	UartReceiveToIdleDMA(&Uart1, rx_dma_buffer, sizeof(rx_dma_buffer));
-	
-	timer_init.update_time_us = 1000;
-	TimerInit(&Timer0, &timer_init);
-	
-//	GetSystemClock(&system_freq);
-//	while(SetSystemClock(96000000));
-//	GetSystemClock(&system_freq);
-	
+    UartSendDMA(&Uart1, txbuffer1, sizeof(txbuffer1));
+    UartReceiveToIdleDMA(&Uart1, rx_dma_buffer, sizeof(rx_dma_buffer));
+    
+    i2c_init.speed = 100000;
+    i2c_init.local_addr = 0x47;
+    I2cInit(&I2c0, &i2c_init);
+    while(I2cWrite(&I2c0, 0x64, i2c_write_buf, sizeof(i2c_write_buf)) != 0);
+    while(I2cWrite(&I2c0, 0x64, &rd_wr_addr, 1) != 0);
+    while(I2cRead(&I2c0, 0x64, i2c_read_buf, sizeof(i2c_read_buf)) != 0);
+    
+//  GetSystemClock(&system_freq);
+//  while(SetSystemClock(96000000));
+//  GetSystemClock(&system_freq);
+    
     while(1){
-		if(debug_control_flag == 1)
-		{
-			debug_control_flag = 0;
-		}
-		if(debug_control_flag1 == 1)
-		{
-			debug_control_flag1 = 0;
-		}
+        static uint64_t last_flush_time = 0;
+        uint64_t time = GetSystemTimer_us();
+        static uint8_t led = 0;
+
+        if(time - last_flush_time > 500000)
+        {
+            last_flush_time = time;
+            elog_flush();		// 500ms调用一次即可
+            if(led == 0)
+            {
+                led = 1;
+                gpio_bit_set(GPIOB, GPIO_PIN_12);
+            }
+            else
+            {
+                led = 0;
+                gpio_bit_reset(GPIOB, GPIO_PIN_12);
+            }
+        }
+        
+        if(debug_control_flag == 1)
+        {
+            while(I2cWrite(&I2c0, 0x64, &rd_wr_addr, 1) != 0);
+            while(I2cRead(&I2c0, 0x64, i2c_read_buf, sizeof(i2c_read_buf)) != 0);
+            debug_control_flag = 0;
+        }
     }
-	
+    
 }
 
-/*!
-    \brief      configure DMA interrupt
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-void nvic_config(void)
+static void elog(void)
 {
-    nvic_irq_enable(DMA0_Channel3_IRQn, 0, 0);
-    nvic_irq_enable(DMA0_Channel4_IRQn, 0, 1);
-}
-
-/* retarget the C library printf function to the USART */
-int fputc(int ch, FILE *f)
-{
-    usart_data_transmit(EVAL_COM0, (uint8_t)ch);
-    while(RESET == usart_flag_get(EVAL_COM0, USART_FLAG_TBE));
-    return ch;
+      elog_init();
+      /* set EasyLogger log format */
+      elog_set_fmt(ELOG_LVL_ASSERT, ELOG_FMT_TAG | ELOG_FMT_TIME);
+      elog_set_fmt(ELOG_LVL_ERROR, ELOG_FMT_TAG | ELOG_FMT_TIME);
+      elog_set_fmt(ELOG_LVL_WARN, ELOG_FMT_TAG | ELOG_FMT_TIME);
+      elog_set_fmt(ELOG_LVL_INFO, ELOG_FMT_TAG | ELOG_FMT_TIME);
+      elog_set_fmt(ELOG_LVL_DEBUG, ELOG_FMT_TAG | ELOG_FMT_TIME);
+      elog_set_fmt(ELOG_LVL_VERBOSE, ELOG_FMT_TAG | ELOG_FMT_TIME);
+      /* start EasyLogger */
+      elog_start();
 }

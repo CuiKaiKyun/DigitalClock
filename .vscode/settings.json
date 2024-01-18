@@ -15,6 +15,11 @@
         "new": "c",
         "functional": "c",
         "type_traits": "c",
-        "driver_uart.h": "c"
+        "driver_uart.h": "c",
+        "chip_resource.h": "c",
+        "driver_timer.h": "c",
+        "stddef.h": "c",
+        "stdarg.h": "c",
+        "elog.h": "c"
     }
 }

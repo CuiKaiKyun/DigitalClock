@@ -7,15 +7,16 @@
                 "d:\\Project\\DigitalClock\\Software\\CMSIS\\GD\\GD32F30x\\Include",
                 "d:\\Project\\DigitalClock\\Software\\CMSIS",
                 "d:\\Project\\DigitalClock\\Software",
-                "d:\\Project\\DigitalClock\\Software\\Utilities",
-                "d:\\Project\\DigitalClock\\Software\\HAL\\Include",
-                "d:\\Project\\DigitalClock\\Software\\HAL",
+                "d:\\Project\\DigitalClock\\Software\\driver",
+                "d:\\Project\\DigitalClock\\Software\\driver\\Include",
+                "d:\\Project\\DigitalClock\\Software\\common\\easy_log",
+                "d:\\Project\\DigitalClock\\Software\\common\\system_timer",
                 "D:\\keil5\\ARM\\ARMCC\\include",
                 "D:\\keil5\\ARM\\ARMCC\\include\\rw",
                 "d:\\Project\\DigitalClock\\Software\\GD32F30x_standard_peripheral\\Source",
                 "d:\\Project\\DigitalClock\\Software\\CMSIS\\GD\\GD32F30x\\Source",
                 "d:\\Project\\DigitalClock\\Software\\CMSIS\\GD\\GD32F30x\\Source\\ARM",
-                "d:\\Project\\DigitalClock\\Software\\HAL\\Source"
+                "d:\\Project\\DigitalClock\\Software\\driver\\Source"
             ],
             "defines": [
                 "GD32F30X_HD",
