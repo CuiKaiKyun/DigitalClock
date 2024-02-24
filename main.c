@@ -41,6 +41,7 @@ OF SUCH DAMAGE.
 #include "driver.h"
 #include "elog.h"
 #include "system_timer.h"
+#include "terminal_com.h"
 
 __IO FlagStatus g_transfer_complete = RESET;
 uint8_t rx_dma_buffer[10];
@@ -51,6 +52,7 @@ uint8_t i2c_read_buf[16];
 uint32_t system_freq;
 uint32_t temp;
 float degree;
+uint16_t terminal_cnt = 0;
 
 uint8_t debug_control_flag = 0;
 uint16_t send_time = 0;
@@ -74,6 +76,32 @@ static void restart_receive1(uint16_t data_len)
     UartSendDMA(&Uart1, debug_buf1, strlen((const char *)debug_buf1));
     UartReceiveToIdleDMA(&Uart1, rx_dma_buffer, sizeof(rx_dma_buffer));
 }
+
+static void command_test_func(void)
+{
+    terminal_cnt ++;
+}
+
+static void print_func(void)
+{
+    elog_i("main", "print test");
+}
+
+static void print1_func(void)
+{
+    elog_i("main", "print1 test");
+}
+
+static void print2_func(void)
+{
+    elog_i("main", "print2 test");
+}
+
+static void print12_func(void)
+{
+    elog_i("main", "print12 test");
+}
+
 
 /*!
     \brief      main function
@@ -100,6 +128,7 @@ int main(void)
     SystemTimerInit();
 
     elog();
+    TerminalComInit();
     
     UartInit(&Uart1, &uart_init);
     UartSendCallbackRegister(&Uart1, &updateflag1);
@@ -111,6 +140,12 @@ int main(void)
     i2c_init.speed = 100000;
     i2c_init.local_addr = 0x47;
     I2cInit(&I2c0, &i2c_init);
+
+    TerminalCommandRegister("command_test", &command_test_func);
+    TerminalCommandRegister("print", &print_func);
+    TerminalCommandRegister("print1", &print1_func);
+    TerminalCommandRegister("print2", &print2_func);
+    TerminalCommandRegister("print12", &print12_func);
     
 //  GetSystemClock(&system_freq);
 //  while(SetSystemClock(96000000));
@@ -118,8 +153,14 @@ int main(void)
     
     while(1){
         static uint64_t last_flush_time = 0;
+        static uint64_t last_terminal_time = 0;
         uint64_t time = GetSystemTimer_us();
         static uint8_t led = 0;
+
+        if(time - last_terminal_time > 50000)
+        {
+            terminal_output();
+        }
 
         if(time - last_flush_time > 500000)
         {

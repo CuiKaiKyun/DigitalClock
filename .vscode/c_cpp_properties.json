@@ -11,6 +11,7 @@
                 "d:\\Project\\DigitalClock\\Software\\driver\\Include",
                 "d:\\Project\\DigitalClock\\Software\\common\\easy_log",
                 "d:\\Project\\DigitalClock\\Software\\common\\system_timer",
+                "d:\\Project\\DigitalClock\\Software\\common\\terminal_com",
                 "D:\\keil5\\ARM\\ARMCC\\include",
                 "D:\\keil5\\ARM\\ARMCC\\include\\rw",
                 "d:\\Project\\DigitalClock\\Software\\GD32F30x_standard_peripheral\\Source",

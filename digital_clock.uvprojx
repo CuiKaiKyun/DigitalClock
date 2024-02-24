@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>GD32F30X_HD DEBUG</Define>
               <Undefine></Undefine>
-              <IncludePath>.\GD32F30x_standard_peripheral\Include;.\CMSIS\GD\GD32F30x\Include;.\CMSIS;..\Software;.\driver;.\driver\Include;.\common\easy_log;.\common\system_timer;.\common\system_timer</IncludePath>
+              <IncludePath>.\GD32F30x_standard_peripheral\Include;.\CMSIS\GD\GD32F30x\Include;.\CMSIS;..\Software;.\driver;.\driver\Include;.\common\easy_log;.\common\system_timer;.\common\system_timer;.\common\terminal_com</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -683,6 +683,11 @@
               <FileName>system_timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\common\system_timer\system_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>terminal_com.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\common\terminal_com\terminal_com.c</FilePath>
             </File>
           </Files>
         </Group>

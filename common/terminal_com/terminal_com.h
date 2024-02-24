@@ -12,4 +12,6 @@ typedef struct __Command
 
 int8_t TerminalComInit(void);
 
-void TerminalCommandRegister(const char *command_string, CommandFuncType* command_func);
+int8_t TerminalCommandRegister(const char *command_string, CommandFuncType* command_func);
+
+int8_t terminal_output(void);

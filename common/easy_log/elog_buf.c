@@ -88,8 +88,8 @@ void elog_flush(void) {
     elog_output_lock();
     /* output log */
     if(elog_port_output(log_buf, buf_write_size) == 0) {
-		/* reset write index */
-		buf_write_size = 0;
+        /* reset write index */
+        buf_write_size = 0;
     }
     /* unlock output */
     elog_output_unlock();
