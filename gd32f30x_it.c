@@ -173,7 +173,7 @@ void USART0_IRQHandler(void)
     if(RESET != usart_interrupt_flag_get(USART0, USART_INT_FLAG_IDLE)){
         /* clear IDLE flag */
         usart_data_receive(USART0);
-		
+        
         UartReceiveIdleCallback(&Uart0);
     }
 }
